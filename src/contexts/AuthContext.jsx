@@ -13,6 +13,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+// Add this function inside AuthProvider
+const checkUserExists = async (email) => {
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+
+    return data ?? null; // return user data if exists, else null
+  } catch (err) {
+    console.error('Error checking user existence:', err.message);
+    return null;
+  }
+};
+
 
   useEffect(() => {
     const getInitialSession = async () => {
