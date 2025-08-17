@@ -86,8 +86,7 @@ const FriendsLeaderboard = () => {
   // UI
   // ---------------------------------------------------
   return (
-      return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-sky-100">
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 to-sky-100">
       <ToastContainer />
 
       {/* Header */}
