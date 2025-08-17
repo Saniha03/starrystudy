@@ -7,61 +7,61 @@
 @layer base {
   :root {
     /* Background Colors */
-    --color-background: #0F172A; /* slate-900 - Rich dark blue night sky foundation */
-    --color-foreground: #F8FAFC; /* slate-50 - Near-white for maximum readability */
-    --color-surface: #1E293B; /* slate-800 - Elevated surface for cards and containers */
-    --color-surface-foreground: #F8FAFC; /* slate-50 - Text on surface elements */
+    --color-background: #E0F7FF; /* Light sky blue foundation */
+    --color-foreground: #0F172A; /* Dark text for readability */
+    --color-surface: #B3ECFF; /* Slightly darker sky blue for cards */
+    --color-surface-foreground: #0F172A; /* Text on surface */
     
     /* Border and Input Colors */
-    --color-border: rgba(148, 163, 184, 0.2); /* slate-400 with opacity - Subtle dividers */
-    --color-input: #1E293B; /* slate-800 - Input background matching surface */
-    --color-ring: #3B82F6; /* blue-500 - Focus ring color */
+    --color-border: rgba(0, 112, 255, 0.2); /* Soft sky blue borders */
+    --color-input: #B3ECFF; /* Input background matching surface */
+    --color-ring: #3B82F6; /* Sky blue focus ring */
     
     /* Card Colors */
-    --color-card: #1E293B; /* slate-800 - Card background */
-    --color-card-foreground: #F8FAFC; /* slate-50 - Card text */
+    --color-card: #B3ECFF; /* Card background */
+    --color-card-foreground: #0F172A; /* Card text */
     
     /* Popover Colors */
-    --color-popover: #1E293B; /* slate-800 - Popover background */
-    --color-popover-foreground: #F8FAFC; /* slate-50 - Popover text */
+    --color-popover: #B3ECFF;
+    --color-popover-foreground: #0F172A;
     
     /* Muted Colors */
-    --color-muted: #334155; /* slate-700 - Muted background */
-    --color-muted-foreground: #94A3B8; /* slate-400 - Muted text secondary information */
+    --color-muted: #A6DFFF; /* Soft muted blue */
+    --color-muted-foreground: #1E3A8A; /* Darker blue for secondary text */
     
     /* Primary Colors */
-    --color-primary: #0A2E73; /* blue-800 - Deep royal blue for trust and focus */
-    --color-primary-foreground: #F8FAFC; /* slate-50 - White text on primary */
+    --color-primary: #7DD3FC; /* Sky blue gradient start */
+    --color-primary-foreground: #0F172A; /* Dark text on primary */
     
     /* Secondary Colors */
-    --color-secondary: #3B82F6; /* blue-500 - Brighter blue for interactive elements */
-    --color-secondary-foreground: #F8FAFC; /* slate-50 - White text on secondary */
+    --color-secondary: #F9A8D4; /* Soft pink for interactive elements */
+    --color-secondary-foreground: #0F172A; /* Dark text on secondary */
     
     /* Accent Colors */
-    --color-accent: #F472B6; /* pink-400 - Soft pink for warmth and achievements */
-    --color-accent-foreground: #0F172A; /* slate-900 - Dark text on accent */
+    --color-accent: #F472B6; /* Pink accent for highlights */
+    --color-accent-foreground: #0F172A;
     
     /* Success Colors */
-    --color-success: #10B981; /* emerald-500 - Gentle green for completed tasks */
-    --color-success-foreground: #F8FAFC; /* slate-50 - White text on success */
+    --color-success: #10B981;
+    --color-success-foreground: #0F172A;
     
     /* Warning Colors */
-    --color-warning: #F59E0B; /* amber-500 - Warm amber for deadlines */
-    --color-warning-foreground: #0F172A; /* slate-900 - Dark text on warning */
+    --color-warning: #F59E0B;
+    --color-warning-foreground: #0F172A;
     
     /* Error/Destructive Colors */
-    --color-error: #EF4444; /* red-500 - Soft red for error states */
-    --color-error-foreground: #F8FAFC; /* slate-50 - White text on error */
-    --color-destructive: #EF4444; /* red-500 - Destructive actions */
-    --color-destructive-foreground: #F8FAFC; /* slate-50 - White text on destructive */
+    --color-error: #EF4444;
+    --color-error-foreground: #0F172A;
+    --color-destructive: #EF4444;
+    --color-destructive-foreground: #0F172A;
     
     /* Border Radius */
-    --radius: 0.5rem; /* 8px standard radius */
+    --radius: 0.5rem;
     
     /* Shadows */
-    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --shadow-card: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-card: inset 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -73,7 +73,6 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -87,13 +86,11 @@
 }
 
 @layer components {
-  /* Morphic Cards */
   .morphic-card {
     @apply bg-card text-card-foreground rounded-xl p-6;
     box-shadow: var(--shadow-card), var(--shadow-soft);
   }
   
-  /* Breathing Buttons */
   .breathing-button {
     @apply transition-all duration-200 ease-in-out;
   }
@@ -103,7 +100,6 @@
     box-shadow: var(--shadow-medium);
   }
   
-  /* Floating Action Pattern */
   .floating-action {
     box-shadow: var(--shadow-medium);
     @apply transition-all duration-200 ease-in-out;
@@ -111,15 +107,14 @@
   
   .floating-action:hover {
     @apply -translate-y-1;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   }
   
-  /* Gradient Overlays */
+  /* Gradient Overlays - Sky Blue Gradient */
   .cosmic-gradient {
-    background: radial-gradient(circle at center, #1E3A8A 0%, #0F172A 100%);
+    background: linear-gradient(135deg, #7DD3FC 0%, #38BDF8 50%, #0EA5E9 100%);
   }
   
-  /* Constellation Navigation */
   .constellation-dot {
     @apply w-2 h-2 rounded-full bg-muted-foreground transition-all duration-200;
   }
@@ -128,58 +123,30 @@
     @apply bg-accent scale-125;
   }
   
-  /* Ambient Animations */
   .pulse-gentle {
     animation: pulse-gentle 2s ease-in-out infinite;
   }
   
   @keyframes pulse-gentle {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
   }
   
-  /* Contextual Reveals */
   .slide-in {
     animation: slide-in 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   @keyframes slide-in {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
-  /* Bottom Navigation Safe Area */
-  .bottom-nav-safe {
-    @apply pb-20; /* 80px clearance for bottom navigation */
-  }
-  
-  /* Modal Backdrop */
-  .modal-backdrop {
-    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
-  }
-  
-  /* Notification Toast */
-  .notification-toast {
-    @apply fixed top-4 left-1/2 -translate-x-1/2 z-50 slide-in;
-  }
+  .bottom-nav-safe { @apply pb-20; }
+  .modal-backdrop { @apply fixed inset-0 bg-black/30 backdrop-blur-sm z-50; }
+  .notification-toast { @apply fixed top-4 left-1/2 -translate-x-1/2 z-50 slide-in; }
 }
 
 @layer utilities {
-  .scale-102 {
-    transform: scale(1.02);
-  }
-  
-  .text-shadow-soft {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
+  .scale-102 { transform: scale(1.02); }
+  .text-shadow-soft { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
 }
