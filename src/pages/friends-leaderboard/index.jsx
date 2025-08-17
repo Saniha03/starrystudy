@@ -86,47 +86,48 @@ const FriendsLeaderboard = () => {
   // UI
   // ---------------------------------------------------
   return (
-    <div className="min-h-screen bg-background">
+      return (
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-sky-100">
       <ToastContainer />
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <div className="sticky top-0 z-10 bg-gradient-to-r from-sky-100 to-sky-200/90 backdrop-blur-sm border-b border-sky-200">
+        <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-semibold text-foreground">
-              Friends &amp; Leaderboard
+            <h1 className="text-3xl font-bold text-sky-800">
+              Friends & Leaderboard
             </h1>
             <Button
               variant="default"
               size="sm"
               onClick={() => setIsAddFriendModalOpen(true)}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              className="bg-pink-400 text-white hover:bg-pink-500 shadow-md"
             >
               <Icon name="UserPlus" size={16} className="mr-2" />
               Add Friend
             </Button>
           </div>
 
-          {/* Tabs */}
-          <div className="flex bg-muted rounded-lg p-1">
+          {/* Tab Navigation */}
+          <div className="flex bg-sky-200 rounded-lg p-1">
             <button
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition ${
-                activeTab === "friends"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+              onClick={() => setActiveTab('friends')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'friends'
+                  ? 'bg-white text-sky-700 shadow-md'
+                  : 'text-sky-600 hover:text-sky-800'
               }`}
-              onClick={() => setActiveTab("friends")}
             >
               <Icon name="Users" size={16} className="inline mr-2" />
               Friends ({friends?.length})
             </button>
             <button
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition ${
-                activeTab === "leaderboard"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+              onClick={() => setActiveTab('leaderboard')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'leaderboard'
+                  ? 'bg-white text-sky-700 shadow-md'
+                  : 'text-sky-600 hover:text-sky-800'
               }`}
-              onClick={() => setActiveTab("leaderboard")}
             >
               <Icon name="Trophy" size={16} className="inline mr-2" />
               Leaderboard
@@ -135,10 +136,10 @@ const FriendsLeaderboard = () => {
         </div>
       </div>
 
-      {/* Main */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-6 py-6 bottom-nav-safe">
         <AnimatePresence mode="wait">
-          {activeTab === "friends" && (
+          {activeTab === 'friends' && (
             <motion.div
               key="friends"
               initial={{ opacity: 0, x: -20 }}
@@ -147,23 +148,21 @@ const FriendsLeaderboard = () => {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* FRIENDS LIST */}
+              {/* Desktop Layout */}
               <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
                 <div className="lg:col-span-2 space-y-4">
-                  <h2 className="text-lg font-semibold">Your Study Friends</h2>
+                  <h2 className="text-xl font-semibold text-sky-700">Your Study Friends</h2>
                   {friends?.length === 0 ? (
-                    <div className="morphic-card text-center py-12">
-                      <Icon name="Users" size={48} className="mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-medium mb-2">
-                        No friends yet
-                      </h3>
-                      <p className="text-muted-foreground mb-4">
-                        Add friends to start studying together and stay motivated!
+                    <div className="morphic-card text-center py-12 bg-white border border-sky-200 shadow-sm rounded-xl">
+                      <Icon name="Users" size={48} className="text-sky-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-sky-700 mb-2">No friends yet</h3>
+                      <p className="text-sky-500 mb-4">
+                        Add friends to start studying together and compete on the leaderboard!
                       </p>
                       <Button
                         variant="default"
                         onClick={() => setIsAddFriendModalOpen(true)}
-                        className="bg-accent text-accent-foreground hover:bg-accent/90"
+                        className="bg-pink-400 text-white hover:bg-pink-500"
                       >
                         <Icon name="UserPlus" size={16} className="mr-2" />
                         Add Your First Friend
@@ -171,9 +170,9 @@ const FriendsLeaderboard = () => {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {friends.map((friend) => (
+                      {friends?.map(friend => (
                         <FriendCard
-                          key={friend.id}
+                          key={friend?.id}
                           friend={friend}
                           onViewProgress={handleViewProgress}
                           onSendEncouragement={handleSendEncouragement}
@@ -183,7 +182,6 @@ const FriendsLeaderboard = () => {
                   )}
                 </div>
 
-                {/* ACTIVITY FEED */}
                 <div className="space-y-4">
                   <ActivityFeed activities={activities} />
                 </div>
@@ -192,18 +190,16 @@ const FriendsLeaderboard = () => {
               {/* Mobile Layout */}
               <div className="lg:hidden space-y-6">
                 <div className="space-y-4">
-                  <h2 className="text-lg font-semibold">Your Study Friends</h2>
+                  <h2 className="text-lg font-semibold text-sky-700">Your Study Friends</h2>
                   {friends?.length === 0 ? (
-                    <div className="morphic-card text-center py-12">
-                      <Icon name="Users" size={48} className="text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No friends yet</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Add friends to start studying together!
-                      </p>
+                    <div className="morphic-card text-center py-12 bg-white border border-sky-200 rounded-xl shadow-sm">
+                      <Icon name="Users" size={48} className="text-sky-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-sky-700 mb-2">No friends yet</h3>
+                      <p className="text-sky-500 mb-4">Add friends to start studying together!</p>
                       <Button
                         variant="default"
                         onClick={() => setIsAddFriendModalOpen(true)}
-                        className="bg-accent text-accent-foreground hover:bg-accent/90"
+                        className="bg-pink-400 text-white hover:bg-pink-500"
                       >
                         <Icon name="UserPlus" size={16} className="mr-2" />
                         Add Your First Friend
@@ -211,9 +207,9 @@ const FriendsLeaderboard = () => {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {friends.map((friend) => (
+                      {friends?.map(friend => (
                         <FriendCard
-                          key={friend.id}
+                          key={friend?.id}
                           friend={friend}
                           onViewProgress={handleViewProgress}
                           onSendEncouragement={handleSendEncouragement}
@@ -222,7 +218,6 @@ const FriendsLeaderboard = () => {
                     </div>
                   )}
                 </div>
-
                 <div className="morphic-card">
                   <ActivityFeed activities={activities} />
                 </div>
@@ -230,8 +225,7 @@ const FriendsLeaderboard = () => {
             </motion.div>
           )}
 
-          {/* LEADERBOARD TAB */}
-          {activeTab === "leaderboard" && (
+          {activeTab === 'leaderboard' && (
             <motion.div
               key="leaderboard"
               initial={{ opacity: 0, x: 20 }}
@@ -241,61 +235,58 @@ const FriendsLeaderboard = () => {
               className="space-y-6"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Leaderboard</h2>
+                <h2 className="text-lg font-semibold text-sky-700">Leaderboard</h2>
                 <div className="w-64">
                   <TimeFilter activeFilter={timeFilter} onFilterChange={setTimeFilter} />
                 </div>
               </div>
 
-              <div className="morphic-card p-0 overflow-hidden">
-                <div className="p-6 border-b border-border">
+              <div className="morphic-card p-0 overflow-hidden bg-white border border-sky-200 shadow-sm rounded-xl">
+                <div className="p-6 border-b border-sky-200">
                   <div className="flex items-center gap-3">
-                    <Icon name="Trophy" size={24} className="text-accent" />
+                    <Icon name="Trophy" size={24} className="text-pink-500" />
                     <div>
-                      <h3 className="font-semibold">
-                        {timeFilter.charAt(0).toUpperCase() + timeFilter.slice(1)} Rankings
+                      <h3 className="font-semibold text-sky-700">
+                        {timeFilter?.charAt(0)?.toUpperCase() + timeFilter?.slice(1)} Rankings
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Based on points earned this {timeFilter.replace("ly", "")}
+                      <p className="text-sm text-sky-500">
+                        Based on points earned this {timeFilter?.replace('ly', '')}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-6 space-y-2">
-                  {leaderboardData?.map((u) => (
+                  {leaderboardData?.map(user => (
                     <LeaderboardItem
-                      key={u.id}
-                      friend={u}
-                      position={u.position}
-                      isCurrentUser={u.id === user?.id}
+                      key={user?.id}
+                      friend={user}
+                      position={user?.position}
+                      isCurrentUser={user?.id === currentUser?.id}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="morphic-card text-center">
-                  <Icon name="Users" size={32} className="text-accent mx-auto mb-2" />
-                  <h3 className="text-2xl font-bold">
-                    {friends.length + 1}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">Total Members</p>
+                <div className="morphic-card text-center bg-white border border-sky-200 shadow-sm rounded-xl">
+                  <Icon name="Users" size={32} className="text-pink-400 mx-auto mb-2" />
+                  <h3 className="text-2xl font-bold text-sky-700">{friends?.length + 1}</h3>
+                  <p className="text-sm text-sky-500">Total Members</p>
                 </div>
-                <div className="morphic-card text-center">
-                  <Icon name="TrendingUp" size={32} className="text-success mx-auto mb-2" />
-                  <h3 className="text-2xl font-bold">
-                    #{leaderboardData.find((u) => u.id === user?.id)?.position || 1}
+                <div className="morphic-card text-center bg-white border border-sky-200 shadow-sm rounded-xl">
+                  <Icon name="TrendingUp" size={32} className="text-azure-500 mx-auto mb-2" />
+                  <h3 className="text-2xl font-bold text-sky-700">
+                    #{leaderboardData?.find(u => u?.id === currentUser?.id)?.position || 1}
                   </h3>
-                  <p className="text-sm text-muted-foreground">Your Rank</p>
+                  <p className="text-sm text-sky-500">Your Rank</p>
                 </div>
-                <div className="morphic-card text-center">
-                  <Icon name="Star" size={32} className="text-warning mx-auto mb-2" />
-                  <h3 className="text-2xl font-bold">
-                    {(user?.totalPoints || 0).toLocaleString()}
+                <div className="morphic-card text-center bg-white border border-sky-200 shadow-sm rounded-xl">
+                  <Icon name="Star" size={32} className="text-pink-400 mx-auto mb-2" />
+                  <h3 className="text-2xl font-bold text-sky-700">
+                    {currentUser?.totalPoints?.toLocaleString()}
                   </h3>
-                  <p className="text-sm text-muted-foreground">Your Points</p>
+                  <p className="text-sm text-sky-500">Your Points</p>
                 </div>
               </div>
             </motion.div>
@@ -303,7 +294,6 @@ const FriendsLeaderboard = () => {
         </AnimatePresence>
       </div>
 
-      {/* Add Friend Modal */}
       <AddFriendModal
         isOpen={isAddFriendModalOpen}
         onClose={() => setIsAddFriendModalOpen(false)}
