@@ -1,173 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Icon from '../../components/AppIcon';
-import Button from '../../components/ui/Button';
-import { useToast } from '../../components/ui/NotificationToast';
-import FriendCard from './components/FriendCard';
-import LeaderboardItem from './components/LeaderboardItem';
-import AddFriendModal from './components/AddFriendModal';
-import TimeFilter from './components/TimeFilter';
-import ActivityFeed from './components/ActivityFeed';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../contexts/AuthContext";
+import Icon from "../../components/AppIcon";
+import Button from "../../components/ui/Button";
+import { useToast } from "../../components/ui/NotificationToast";
+import FriendCard from "./components/FriendCard";
+import LeaderboardItem from "./components/LeaderboardItem";
+import AddFriendModal from "./components/AddFriendModal";
+import TimeFilter from "./components/TimeFilter";
+import ActivityFeed from "./components/ActivityFeed";
 
 const FriendsLeaderboard = () => {
-  const [activeTab, setActiveTab] = useState('friends');
-  const [timeFilter, setTimeFilter] = useState('weekly');
-  const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+  const { user } = useAuth(); // <-- authenticated user
   const [friends, setFriends] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [activeTab, setActiveTab] = useState("friends");
+  const [timeFilter, setTimeFilter] = useState("weekly");
+  const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
   const { addToast, ToastContainer } = useToast();
 
-  // Mock current user data
-  const currentUser = {
-    id: 'current-user',
-    name: 'You',
-    email: 'you@example.com',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=currentuser',
-    status: 'online',
-    totalPoints: 3250,
-    weeklyProgress: 420,
-    lastActivity: 'Active now',
-    trend: 'up'
-  };
+  // ---------------------------------------------------
+  // Fetch Friends
+  // ---------------------------------------------------
+  const fetchFriends = useCallback(async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("friends")
+      .select("*")
+      .eq("owner_id", user.id);
 
-  // Mock friends data
+    if (!error) setFriends(data || []);
+  }, [user]);
+
+  // ---------------------------------------------------
+  // Fetch Activity Feed
+  // ---------------------------------------------------
+  const fetchActivities = useCallback(async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("activities")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (!error) setActivities(data || []);
+  }, [user]);
+
+  // Initial fetch
   useEffect(() => {
-    const mockFriends = [
-      {
-        id: 1,
-        name: 'Sarah Chen',
-        email: 'sarah.chen@example.com',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-        status: 'studying',
-        totalPoints: 4150,
-        weeklyProgress: 580,
-        lastActivity: 'Completed "Math Assignment" 15 min ago',
-        trend: 'up'
-      },
-      {
-        id: 2,
-        name: 'Alex Rodriguez',
-        email: 'alex.rodriguez@example.com',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-        status: 'online',
-        totalPoints: 3890,
-        weeklyProgress: 320,
-        lastActivity: 'Started study session 1 hour ago',
-        trend: 'up'
-      },
-      {
-        id: 3,
-        name: 'Emma Thompson',
-        email: 'emma.thompson@example.com',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-        status: 'away',
-        totalPoints: 2980,
-        weeklyProgress: 280,
-        lastActivity: 'Achieved goal "Read 5 chapters" 3 hours ago',
-        trend: 'same'
-      },
-      {
-        id: 4,
-        name: 'Marcus Johnson',
-        email: 'marcus.johnson@example.com',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        status: 'offline',
-        totalPoints: 2750,
-        weeklyProgress: 180,
-        lastActivity: 'Completed 2 tasks yesterday',
-        trend: 'down'
-      },
-      {
-        id: 5,
-        name: 'Lily Wang',
-        email: 'lily.wang@example.com',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
-        status: 'studying',
-        totalPoints: 2100,
-        weeklyProgress: 350,
-        lastActivity: 'Started "Chemistry Review" 30 min ago',
-        trend: 'up'
-      }
-    ];
-    setFriends(mockFriends);
-  }, []);
+    fetchFriends();
+    fetchActivities();
+  }, [fetchFriends, fetchActivities]);
 
-  // Mock activity data
-  useEffect(() => {
-    const mockActivities = [
-      {
-        id: 1,
-        user: friends?.find(f => f?.id === 1) || friends?.[0],
-        type: 'task_completed',
-        description: 'completed "Math Assignment"',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000),
-        points: 50
-      },
-      {
-        id: 2,
-        user: friends?.find(f => f?.id === 2) || friends?.[1],
-        type: 'study_session',
-        description: 'studied for 2 hours',
-        timestamp: new Date(Date.now() - 60 * 60 * 1000),
-        points: 120
-      },
-      {
-        id: 3,
-        user: friends?.find(f => f?.id === 3) || friends?.[2],
-        type: 'goal_achieved',
-        description: 'achieved goal "Read 5 chapters"',
-        timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-        points: 200
-      },
-      {
-        id: 4,
-        user: friends?.find(f => f?.id === 5) || friends?.[4],
-        type: 'study_session',
-        description: 'started "Chemistry Review"',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000),
-        points: null
-      },
-      {
-        id: 5,
-        user: friends?.find(f => f?.id === 1) || friends?.[0],
-        type: 'milestone',
-        description: 'reached 4000 points milestone!',
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-        points: 100
-      }
-    ];
-    setActivities(mockActivities);
-  }, [friends]);
+  // ---------------------------------------------------
+  // Leaderboard (user + friends sorted by totalPoints)
+  // ---------------------------------------------------
+  const leaderboardData = useMemo(() => {
+    // Combine current user with friends array
+    const all = [{ ...user, totalPoints: user?.totalPoints || 0 }, ...friends];
 
-  // Create leaderboard with current user
-  const getLeaderboardData = () => {
-    const allUsers = [currentUser, ...friends];
-    return allUsers?.sort((a, b) => b?.totalPoints - a?.totalPoints)?.map((user, index) => ({ ...user, position: index + 1 }));
-  };
+    // Sort descending based on totalPoints
+    return all
+      .sort((a, b) => (b?.totalPoints || 0) - (a?.totalPoints || 0))
+      .map((u, i) => ({ ...u, position: i + 1 }));
+  }, [user, friends]);
 
+  // ---------------------------------------------------
+  // Event Handlers
+  // ---------------------------------------------------
   const handleViewProgress = (friend) => {
-    addToast(`Viewing ${friend?.name}'s progress`, 'info');
+    addToast(`Viewing ${friend?.name || friend?.email}'s progress`, "info");
   };
 
   const handleSendEncouragement = (friend) => {
-    addToast(`Encouragement sent to ${friend?.name}!`, 'friend');
+    addToast(`Encouragement sent to ${friend?.name || friend?.email}!`, "friend");
   };
 
   const handleAddFriend = (newFriend) => {
-    setFriends(prev => [...prev, newFriend]);
+    // optimistic update
+    setFriends((prev) => [...prev, newFriend]);
+    addToast("Friend added!", "success");
   };
 
-  const leaderboardData = getLeaderboardData();
-
+  // ---------------------------------------------------
+  // UI
+  // ---------------------------------------------------
   return (
     <div className="min-h-screen bg-background">
       <ToastContainer />
+
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-semibold text-foreground">
-              Friends & Leaderboard
+              Friends &amp; Leaderboard
             </h1>
             <Button
               variant="default"
@@ -180,22 +107,26 @@ const FriendsLeaderboard = () => {
             </Button>
           </div>
 
-          {/* Tab Navigation */}
+          {/* Tabs */}
           <div className="flex bg-muted rounded-lg p-1">
             <button
-              onClick={() => setActiveTab('friends')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'friends' ?'bg-card text-foreground shadow-sm' :'text-muted-foreground hover:text-foreground'
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition ${
+                activeTab === "friends"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              onClick={() => setActiveTab("friends")}
             >
               <Icon name="Users" size={16} className="inline mr-2" />
               Friends ({friends?.length})
             </button>
             <button
-              onClick={() => setActiveTab('leaderboard')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'leaderboard' ?'bg-card text-foreground shadow-sm' :'text-muted-foreground hover:text-foreground'
+              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition ${
+                activeTab === "leaderboard"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              onClick={() => setActiveTab("leaderboard")}
             >
               <Icon name="Trophy" size={16} className="inline mr-2" />
               Leaderboard
@@ -203,10 +134,11 @@ const FriendsLeaderboard = () => {
           </div>
         </div>
       </div>
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6 bottom-nav-safe">
+
+      {/* Main */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <AnimatePresence mode="wait">
-          {activeTab === 'friends' && (
+          {activeTab === "friends" && (
             <motion.div
               key="friends"
               initial={{ opacity: 0, x: -20 }}
@@ -215,21 +147,18 @@ const FriendsLeaderboard = () => {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* Desktop Layout */}
+              {/* FRIENDS LIST */}
               <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
-                {/* Friends List */}
                 <div className="lg:col-span-2 space-y-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Your Study Friends
-                  </h2>
+                  <h2 className="text-lg font-semibold">Your Study Friends</h2>
                   {friends?.length === 0 ? (
                     <div className="morphic-card text-center py-12">
-                      <Icon name="Users" size={48} className="text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-foreground mb-2">
+                      <Icon name="Users" size={48} className="mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-medium mb-2">
                         No friends yet
                       </h3>
                       <p className="text-muted-foreground mb-4">
-                        Add friends to start studying together and compete on the leaderboard!
+                        Add friends to start studying together and stay motivated!
                       </p>
                       <Button
                         variant="default"
@@ -242,9 +171,9 @@ const FriendsLeaderboard = () => {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {friends?.map((friend) => (
+                      {friends.map((friend) => (
                         <FriendCard
-                          key={friend?.id}
+                          key={friend.id}
                           friend={friend}
                           onViewProgress={handleViewProgress}
                           onSendEncouragement={handleSendEncouragement}
@@ -254,7 +183,7 @@ const FriendsLeaderboard = () => {
                   )}
                 </div>
 
-                {/* Activity Feed */}
+                {/* ACTIVITY FEED */}
                 <div className="space-y-4">
                   <ActivityFeed activities={activities} />
                 </div>
@@ -262,17 +191,12 @@ const FriendsLeaderboard = () => {
 
               {/* Mobile Layout */}
               <div className="lg:hidden space-y-6">
-                {/* Friends List */}
                 <div className="space-y-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Your Study Friends
-                  </h2>
+                  <h2 className="text-lg font-semibold">Your Study Friends</h2>
                   {friends?.length === 0 ? (
                     <div className="morphic-card text-center py-12">
                       <Icon name="Users" size={48} className="text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-foreground mb-2">
-                        No friends yet
-                      </h3>
+                      <h3 className="text-lg font-medium mb-2">No friends yet</h3>
                       <p className="text-muted-foreground mb-4">
                         Add friends to start studying together!
                       </p>
@@ -287,9 +211,9 @@ const FriendsLeaderboard = () => {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {friends?.map((friend) => (
+                      {friends.map((friend) => (
                         <FriendCard
-                          key={friend?.id}
+                          key={friend.id}
                           friend={friend}
                           onViewProgress={handleViewProgress}
                           onSendEncouragement={handleSendEncouragement}
@@ -299,7 +223,6 @@ const FriendsLeaderboard = () => {
                   )}
                 </div>
 
-                {/* Activity Feed */}
                 <div className="morphic-card">
                   <ActivityFeed activities={activities} />
                 </div>
@@ -307,7 +230,8 @@ const FriendsLeaderboard = () => {
             </motion.div>
           )}
 
-          {activeTab === 'leaderboard' && (
+          {/* LEADERBOARD TAB */}
+          {activeTab === "leaderboard" && (
             <motion.div
               key="leaderboard"
               initial={{ opacity: 0, x: 20 }}
@@ -316,67 +240,60 @@ const FriendsLeaderboard = () => {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* Time Filter */}
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Leaderboard
-                </h2>
+                <h2 className="text-lg font-semibold">Leaderboard</h2>
                 <div className="w-64">
-                  <TimeFilter
-                    activeFilter={timeFilter}
-                    onFilterChange={setTimeFilter}
-                  />
+                  <TimeFilter activeFilter={timeFilter} onFilterChange={setTimeFilter} />
                 </div>
               </div>
 
-              {/* Leaderboard */}
               <div className="morphic-card p-0 overflow-hidden">
                 <div className="p-6 border-b border-border">
                   <div className="flex items-center gap-3">
                     <Icon name="Trophy" size={24} className="text-accent" />
                     <div>
-                      <h3 className="font-semibold text-foreground">
-                        {timeFilter?.charAt(0)?.toUpperCase() + timeFilter?.slice(1)} Rankings
+                      <h3 className="font-semibold">
+                        {timeFilter.charAt(0).toUpperCase() + timeFilter.slice(1)} Rankings
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        Based on points earned this {timeFilter?.replace('ly', '')}
+                        Based on points earned this {timeFilter.replace("ly", "")}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-6 space-y-2">
-                  {leaderboardData?.map((user) => (
+                  {leaderboardData?.map((u) => (
                     <LeaderboardItem
-                      key={user?.id}
-                      friend={user}
-                      position={user?.position}
-                      isCurrentUser={user?.id === currentUser?.id}
+                      key={u.id}
+                      friend={u}
+                      position={u.position}
+                      isCurrentUser={u.id === user?.id}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Stats Summary */}
+              {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="morphic-card text-center">
                   <Icon name="Users" size={32} className="text-accent mx-auto mb-2" />
-                  <h3 className="text-2xl font-bold text-foreground">
-                    {friends?.length + 1}
+                  <h3 className="text-2xl font-bold">
+                    {friends.length + 1}
                   </h3>
                   <p className="text-sm text-muted-foreground">Total Members</p>
                 </div>
                 <div className="morphic-card text-center">
                   <Icon name="TrendingUp" size={32} className="text-success mx-auto mb-2" />
-                  <h3 className="text-2xl font-bold text-foreground">
-                    #{leaderboardData?.find(u => u?.id === currentUser?.id)?.position || 1}
+                  <h3 className="text-2xl font-bold">
+                    #{leaderboardData.find((u) => u.id === user?.id)?.position || 1}
                   </h3>
                   <p className="text-sm text-muted-foreground">Your Rank</p>
                 </div>
                 <div className="morphic-card text-center">
                   <Icon name="Star" size={32} className="text-warning mx-auto mb-2" />
-                  <h3 className="text-2xl font-bold text-foreground">
-                    {currentUser?.totalPoints?.toLocaleString()}
+                  <h3 className="text-2xl font-bold">
+                    {(user?.totalPoints || 0).toLocaleString()}
                   </h3>
                   <p className="text-sm text-muted-foreground">Your Points</p>
                 </div>
@@ -385,6 +302,7 @@ const FriendsLeaderboard = () => {
           )}
         </AnimatePresence>
       </div>
+
       {/* Add Friend Modal */}
       <AddFriendModal
         isOpen={isAddFriendModalOpen}
