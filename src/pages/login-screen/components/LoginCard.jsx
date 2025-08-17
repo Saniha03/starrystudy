@@ -1,152 +1,165 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from '../../../components/ui/Button';
-import Icon from '../../../components/AppIcon';
-import { useToast } from '../../../components/ui/NotificationToast';
-import { useAuth } from '../../../contexts/AuthContext';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useToast } from "../../../components/ui/NotificationToast";
+import Button from "../../../components/ui/Button";
+import Icon from "../../../components/AppIcon";
 
 const LoginCard = () => {
   const navigate = useNavigate();
-  const { addToast } = useToast();
-  const { signIn, signUp, getUserProfile } = useAuth();
-  
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { addToast, ToastContainer } = useToast();
+  const { signIn, signUp, checkUserExists } = useAuth();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "", name: "" });
+  const [error, setError] = useState("");
+
+  const handleInputChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setError("");
+
+    if (!form.email || !form.password || (isRegister && !form.name)) {
+      setError("All fields are required.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      if (isRegistering) {
-        // Check for existing user
-        const { data: existingUser, error: fetchError } = await getUserProfile(email);
-        if (existingUser) {
-          setError('An account with this email already exists. Please log in.');
-          setLoading(false);
+      if (isRegister) {
+        // check if user exists
+        const exists = await checkUserExists(form.email);
+        if (exists) {
+          setError("Email already exists. Please log in.");
+          setIsLoading(false);
           return;
         }
 
-        if (password !== confirmPassword) {
-          setError('Passwords do not match');
-          setLoading(false);
-          return;
-        }
-
-        // Register new user
-        await signUp(email, password, { createdAt: new Date().toISOString() });
-        addToast('Registration successful! You can now log in.', 'success');
-        setIsRegistering(false);
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-
+        // register
+        await signUp(form.email, form.password, { name: form.name });
+        addToast("Registration successful! Please log in.", "success");
+        setIsRegister(false);
       } else {
-        // Sign in existing user
-        const { data, error: loginError } = await signIn(email, password);
-        if (loginError) {
-          setError(loginError.message);
-        } else if (data?.user) {
-          localStorage.setItem('isAuthenticated', 'true');
-          addToast('Welcome back! 🌟', 'success');
-          navigate('/daily-tasks');
-        } else {
-          setError('Login failed. Please try again.');
-        }
+        // login
+        await signIn(form.email, form.password);
+        addToast("Login successful! Redirecting...", "success");
+        navigate("/daily-tasks");
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed. Try again.');
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto px-4">
-      <div className="morphic-card text-center slide-in relative z-10">
-        <h2 className="text-2xl font-semibold text-foreground mb-2">
-          {isRegistering ? 'Create Account' : 'Welcome Back'}
-        </h2>
-        <p className="text-muted-foreground text-sm mb-6">
-          {isRegistering 
-            ? 'Register a new account to start your study journey' 
-            : 'Sign in to continue your study journey with friends'}
-        </p>
+      <motion.div
+        className="morphic-card p-8 rounded-2xl shadow-lg relative bg-gradient-to-b from-sky-100 via-pink-100 to-white"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        {/* Header */}
+        <motion.div
+          className="text-center mb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <h2 className="text-3xl font-bold text-sky-600">
+            {isRegister ? "Create Account" : "Welcome Back"}
+          </h2>
+          <p className="text-pink-500 text-sm mt-2">
+            {isRegister
+              ? "Register to start your study journey!"
+              : "Sign in to continue with your progress"}
+          </p>
+        </motion.div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-accent focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-accent focus:outline-none"
-            />
-          </div>
-
-          {isRegistering && (
-            <div>
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-accent focus:outline-none"
-              />
-            </div>
-          )}
-
-          {error && (
-            <p className="text-red-500 text-sm mt-2">{error}</p>
-          )}
-
-          <Button
-            type="submit"
-            variant="default"
-            size="lg"
-            fullWidth
-            loading={loading}
-            className="mb-4 bg-white text-gray-900 hover:bg-gray-50 border border-gray-200"
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            className="text-red-600 text-sm mb-4 text-center font-medium"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
           >
-            {loading ? (isRegistering ? 'Registering...' : 'Signing in...') : (isRegistering ? 'Register' : 'Sign In')}
-          </Button>
-        </form>
+            {error}
+          </motion.div>
+        )}
 
-        <div className="text-sm mt-4">
-          {isRegistering ? (
+        {/* Form */}
+        <div className="space-y-4">
+          {isRegister && (
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={form.name}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
+            />
+          )}
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            value={form.email}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
+          />
+        </div>
+
+        {/* Submit Button */}
+        <div className="mt-6">
+          <Button
+            fullWidth
+            size="lg"
+            loading={isLoading}
+            onClick={handleSubmit}
+            className="bg-sky-500 hover:bg-sky-600 text-white py-3 rounded-lg font-semibold"
+          >
+            {isRegister ? "Register" : "Login"}
+          </Button>
+        </div>
+
+        {/* Toggle Login/Register */}
+        <div className="mt-4 text-center text-sm text-gray-600">
+          {isRegister ? (
             <p>
-              Already have an account?{' '}
+              Already have an account?{" "}
               <button
-                className="text-accent hover:underline"
-                onClick={() => { setIsRegistering(false); setError(''); }}
+                className="text-pink-500 font-semibold hover:underline"
+                onClick={() => {
+                  setIsRegister(false);
+                  setError("");
+                }}
               >
-                Sign in
+                Login
               </button>
             </p>
           ) : (
             <p>
-              New here?{' '}
+              New here?{" "}
               <button
-                className="text-accent hover:underline"
-                onClick={() => { setIsRegistering(true); setError(''); }}
+                className="text-sky-600 font-semibold hover:underline"
+                onClick={() => {
+                  setIsRegister(true);
+                  setError("");
+                }}
               >
                 Register
               </button>
@@ -154,42 +167,45 @@ const LoginCard = () => {
           )}
         </div>
 
-        <div className="mt-6 space-y-3">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <Icon name="Users" size={16} className="text-accent flex-shrink-0" />
+        {/* Benefits */}
+        <motion.div
+          className="mt-8 space-y-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <Icon name="Users" size={16} className="text-pink-400" />
             <span>Study with friends and stay motivated</span>
           </div>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <Icon name="Target" size={16} className="text-accent flex-shrink-0" />
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <Icon name="Target" size={16} className="text-sky-400" />
             <span>Track goals and earn achievement points</span>
           </div>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <Icon name="Timer" size={16} className="text-accent flex-shrink-0" />
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <Icon name="Timer" size={16} className="text-pink-400" />
             <span>Built-in study timers and progress tracking</span>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-6">
-          <Icon name="Shield" size={14} className="text-success" />
-          <span>Secure authentication with email & password</span>
-        </div>
-      </div>
+        {/* Security Info */}
+        <motion.div
+          className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <Icon name="Shield" size={14} className="text-sky-500" />
+          <span>Secure password authentication</span>
+        </motion.div>
 
-      {/* Footer */}
-      <div className="mt-8 text-center space-y-2">
-        <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-          <button className="hover:text-accent transition-colors">
-            Privacy Policy
-          </button>
-          <span>•</span>
-          <button className="hover:text-accent transition-colors">
-            Terms of Service
-          </button>
-        </div>
-        <p className="text-xs text-muted-foreground">
+        {/* Footer */}
+        <div className="mt-8 text-center text-xs text-gray-400">
           © {new Date().getFullYear()} StarryStudy. All rights reserved.
-        </p>
-      </div>
+        </div>
+      </motion.div>
+
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
   );
 };
