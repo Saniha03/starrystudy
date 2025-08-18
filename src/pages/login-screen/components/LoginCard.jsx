@@ -9,7 +9,7 @@ import Icon from "../../../components/AppIcon";
 const LoginCard = () => {
   const navigate = useNavigate();
   const { addToast, ToastContainer } = useToast();
-  const { signIn, signUp, checkUserExists } = useAuth();
+  const { signIn, signUp, checkUserExists,resetPassword  } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
@@ -19,6 +19,19 @@ const LoginCard = () => {
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+  
+  const handleForgotPassword = async () => {
+  if (!form.email) {
+    setError("Please enter your email first");
+    return;
+  }
+  try {
+    await resetPassword(form.email);
+    addToast("Password reset email sent!", "success");
+  } catch (err) {
+    setError(err.message || "Something went wrong. Please try again.");
+  }
+};
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -122,7 +135,28 @@ const LoginCard = () => {
             className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
           />
         </div>
-
+           <>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
+            />
+            {!isRegister && (
+              <div className="text-right mt-1">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-xs text-sky-600 hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+          </>
+        </div>
         {/* Submit Button */}
         <div className="mt-6">
           <Button
