@@ -9,29 +9,29 @@ import Icon from "../../../components/AppIcon";
 const LoginCard = () => {
   const navigate = useNavigate();
   const { addToast, ToastContainer } = useToast();
-  const { signIn, signUp, checkUserExists,resetPassword  } = useAuth();
+  const { signIn, signUp, checkUserExists, resetPassword } = useAuth();
 
-  const [isLoading, setIsLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "", name: "" });
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [form, setForm] = useState({ email: "", password: "", name: "" });
 
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  
+
   const handleForgotPassword = async () => {
-  if (!form.email) {
-    setError("Please enter your email first");
-    return;
-  }
-  try {
-    await resetPassword(form.email);
-    addToast("Password reset email sent!", "success");
-  } catch (err) {
-    setError(err.message || "Something went wrong. Please try again.");
-  }
-};
+    if (!form.email) {
+      setError("Please enter your email first");
+      return;
+    }
+    try {
+      await resetPassword(form.email);
+      addToast("Password reset email sent!", "success");
+    } catch (err) {
+      setError(err.message || "Something went wrong. Please try again.");
+    }
+  };
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -45,20 +45,18 @@ const LoginCard = () => {
 
     try {
       if (isRegister) {
-        // check if user exists
+        // Register mode
         const exists = await checkUserExists(form.email);
         if (exists) {
           setError("Email already exists. Please log in.");
           setIsLoading(false);
           return;
         }
-
-        // register
         await signUp(form.email, form.password, { name: form.name });
         addToast("Registration successful! Please log in.", "success");
         setIsRegister(false);
       } else {
-        // login
+        // Login mode
         await signIn(form.email, form.password);
         addToast("Login successful! Redirecting...", "success");
         navigate("/daily-tasks");
@@ -110,8 +108,8 @@ const LoginCard = () => {
         <div className="space-y-4">
           {isRegister && (
             <input
-              type="text"
               name="name"
+              type="text"
               placeholder="Full Name"
               value={form.name}
               onChange={handleInputChange}
@@ -119,26 +117,17 @@ const LoginCard = () => {
             />
           )}
           <input
-            type="email"
             name="email"
+            type="email"
             placeholder="Email Address"
             value={form.email}
             onChange={handleInputChange}
             className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
           />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
-          />
-        </div>
-           <div>
+          <div>
             <input
-              type="password"
               name="password"
+              type="password"
               placeholder="Password"
               value={form.password}
               onChange={handleInputChange}
@@ -155,8 +144,9 @@ const LoginCard = () => {
                 </button>
               </div>
             )}
-          
-        {/* Submit Button */}
+          </div>
+        </div>
+
         <div className="mt-6">
           <Button
             fullWidth
@@ -169,17 +159,13 @@ const LoginCard = () => {
           </Button>
         </div>
 
-        {/* Toggle Login/Register */}
         <div className="mt-4 text-center text-sm text-gray-600">
           {isRegister ? (
             <p>
               Already have an account?{" "}
               <button
                 className="text-pink-500 font-semibold hover:underline"
-                onClick={() => {
-                  setIsRegister(false);
-                  setError("");
-                }}
+                onClick={() => { setIsRegister(false); setError(""); }}
               >
                 Login
               </button>
@@ -189,10 +175,7 @@ const LoginCard = () => {
               New here?{" "}
               <button
                 className="text-sky-600 font-semibold hover:underline"
-                onClick={() => {
-                  setIsRegister(true);
-                  setError("");
-                }}
+                onClick={() => { setIsRegister(true); setError(""); }}
               >
                 Register
               </button>
@@ -221,7 +204,7 @@ const LoginCard = () => {
           </div>
         </motion.div>
 
-        {/* Security Info */}
+        {/* Security */}
         <motion.div
           className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500"
           initial={{ opacity: 0 }}
@@ -237,7 +220,6 @@ const LoginCard = () => {
         </div>
       </motion.div>
 
-      {/* Toast Container */}
       <ToastContainer />
     </div>
   );
