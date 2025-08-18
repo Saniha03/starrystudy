@@ -135,7 +135,7 @@ const LoginCard = () => {
             className="w-full px-4 py-3 rounded-lg border border-sky-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
           />
         </div>
-           <>
+           <div>
             <input
               type="password"
               name="password"
@@ -155,8 +155,7 @@ const LoginCard = () => {
                 </button>
               </div>
             )}
-          </>
-        </div>
+          
         {/* Submit Button */}
         <div className="mt-6">
           <Button
