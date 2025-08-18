@@ -145,6 +145,19 @@ export const AuthProvider = ({ children }) => {
       throw err;
     }
   };
+// ----------------- Reset Password -----------------
+const resetPassword = async (email) => {
+  try {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error("Reset Password Error:", err.message);
+    throw err;
+  }
+};
 
   const value = {
     user,
@@ -156,6 +169,7 @@ export const AuthProvider = ({ children }) => {
     getUserProfile,
     updateProfile,
     checkUserExists,
+    resetPassword ,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
