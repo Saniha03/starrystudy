@@ -112,13 +112,15 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete }) => {
           </div>
 
           {/* Category and Time Estimate */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className={`
-              px-2 py-1 rounded-md text-xs font-medium border
-              ${getCategoryColor(task?.category)}
-            `}>
-              {task?.category}
-            </span>
+         <span
+  className={`
+    px-2 py-1 rounded-md text-xs font-medium border
+    ${getCategoryColor(task?.category)}
+  `}
+>
+  {task?.category || 'Other'}
+</span>
+
             
             {task?.timeEstimate && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
