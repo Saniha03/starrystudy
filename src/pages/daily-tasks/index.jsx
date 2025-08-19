@@ -32,7 +32,7 @@ const DailyTasks = () => {
     if (user) {
       loadTasks();
     }
-  }, [user, filters]);
+  }, [user, filters,filters.priority]);
 
   const loadTasks = async () => {
     try {
