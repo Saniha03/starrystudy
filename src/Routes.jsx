@@ -13,15 +13,24 @@ import StudyTimer from './pages/study-timer';
 import UserProfile from './pages/user-profile';
 import FriendsLeaderboard from './pages/friends-leaderboard';
 
+// -------------------- PrivateRoute --------------------
 const PrivateRoute = ({ element }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <p className="text-foreground text-lg">Loading...</p>
+      </div>
+    );
+  }
+
   if (!user) return <Navigate to="/login-screen" replace />;
 
   return element;
 };
 
+// -------------------- Routes --------------------
 const Routes = () => {
   return (
     <BrowserRouter>
