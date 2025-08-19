@@ -14,33 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ----------------- Initial Session -----------------
-  useEffect(() => {
-    const getInitialSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      const session = data?.session ?? null;
-      setUser(session?.user ?? null);
-
-      if (session?.user) await getUserProfile(session.user.id);
-
-      setLoading(false);
-    };
-
-    getInitialSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) await getUserProfile(session.user.id);
-        else setUserProfile(null);
-        setLoading(false);
-      }
-    );
-
-    return () => subscription?.unsubscribe();
-  }, []);
-
-  // ----------------- Get User Profile -----------------
+  // ----------------- Fetch user profile -----------------
   const getUserProfile = async (userId) => {
     try {
       const { data, error } = await supabase
@@ -48,9 +22,7 @@ export const AuthProvider = ({ children }) => {
         .select("*")
         .eq("id", userId)
         .single();
-
       if (error && error.code !== "PGRST116") throw error;
-
       setUserProfile(data ?? null);
       return data ?? null;
     } catch (err) {
@@ -59,119 +31,102 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ----------------- Check if email exists -----------------
-  const checkUserExists = async (email) => {
-    try {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("email", email)
-        .single();
+  // ----------------- Initialize auth -----------------
+  useEffect(() => {
+    let mounted = true;
 
-      if (error && error.code !== "PGRST116") throw error;
+    const initAuth = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session ?? null;
 
-      return data ?? null;
-    } catch (err) {
-      console.error("Error checking user existence:", err.message);
-      return null;
-    }
+        if (!mounted) return;
+
+        setUser(session?.user ?? null);
+        if (session?.user) await getUserProfile(session.user.id);
+      } catch (err) {
+        console.error("Auth session error:", err.message);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+        setUser(session?.user ?? null);
+        if (session?.user) await getUserProfile(session.user.id);
+        else setUserProfile(null);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  // ----------------- Auth actions -----------------
+  const signUp = async (email, password, metadata = {}) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: metadata },
+    });
+    if (error) throw error;
+    return data;
   };
 
-  // ----------------- Sign Up -----------------
-  const signUp = async (email, password, metadata) => {
-    try {
-      const existingUser = await checkUserExists(email);
-      if (existingUser) throw new Error("Email already exists. Please log in.");
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: metadata },
-      });
-
-      if (error) throw error;
-      return data;
-    } catch (err) {
-      console.error("Sign Up Error:", err.message);
-      throw err;
-    }
-  };
-
-  // ----------------- Sign In -----------------
   const signIn = async (email, password) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      return data;
-    } catch (err) {
-      console.error("Sign In Error:", err.message);
-      throw err;
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
   };
 
-  // ----------------- Sign Out -----------------
   const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setUserProfile(null);
-      setUser(null);
-    } catch (err) {
-      console.error("Sign Out Error:", err.message);
-      throw err;
-    }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setUser(null);
+    setUserProfile(null);
   };
 
-  // ----------------- Update Profile -----------------
   const updateProfile = async (updates) => {
     if (!user) throw new Error("No user logged in");
-    try {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq("id", user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      setUserProfile(data);
-      return data;
-    } catch (err) {
-      console.error("Update Profile Error:", err.message);
-      throw err;
-    }
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq("id", user.id)
+      .select()
+      .single();
+    if (error) throw error;
+    setUserProfile(data);
+    return data;
   };
-// ----------------- Reset Password -----------------
-const resetPassword = async (email) => {
-  try {
+
+  const resetPassword = async (email) => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) throw error;
     return data;
-  } catch (err) {
-    console.error("Reset Password Error:", err.message);
-    throw err;
-  }
-};
-
-  const value = {
-    user,
-    userProfile,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    getUserProfile,
-    updateProfile,
-    checkUserExists,
-    resetPassword ,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{
+      user,
+      userProfile,
+      loading,
+      signUp,
+      signIn,
+      signOut,
+      updateProfile,
+      getUserProfile,
+      resetPassword
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
-
