@@ -5,7 +5,7 @@ import Icon from '../../../components/AppIcon';
 const LeaderboardItem = ({ friend, position, isCurrentUser = false }) => {
   if (!friend) return null; // 👉 safely handle missing data
 
-  const getRankIcon = (pos: number) => {
+  const getRankIcon = (pos) => {
     switch (pos) {
       case 1:
         return { icon: 'Crown', color: 'text-yellow-400' };
