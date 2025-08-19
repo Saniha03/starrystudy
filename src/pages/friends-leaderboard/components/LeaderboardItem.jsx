@@ -2,8 +2,8 @@ import React from 'react';
 import Image from '../../../components/AppImage';
 import Icon from '../../../components/AppIcon';
 
-const LeaderboardItem = ({ friend, position, isCurrentUser = false }) => {
-  if (!friend) return null; // 👉 safely handle missing data
+const LeaderboardItem = ({ friend, position, isCurrentUser = false, currentUser }) => {
+  if (!friend) return null; // safely handle missing data
 
   const getRankIcon = (pos) => {
     switch (pos) {
@@ -30,8 +30,8 @@ const LeaderboardItem = ({ friend, position, isCurrentUser = false }) => {
         flex items-center gap-4 p-4 rounded-lg transition-all duration-200
         ${
           isCurrentUser
-            ? 'bg-accent/10 border border-accent/20'
-            : 'hover:bg-muted/30'
+            ? 'bg-blue-50 border border-blue-200'
+            : 'hover:bg-gray-50'
         }
       `}
     >
@@ -44,22 +44,24 @@ const LeaderboardItem = ({ friend, position, isCurrentUser = false }) => {
             className={rankIcon.color}
           />
         ) : (
-          <span className="text-lg font-bold text-muted-foreground">
+          <span className="text-lg font-bold text-gray-600">
             {position}
           </span>
         )}
       </div>
 
       {/* Profile Picture */}
-      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-200">
         {friend.avatar ? (
           <Image
             src={friend.avatar}
-            alt={`${friend.name}'s profile`}
+            alt={`${friend.name || 'User'}'s profile`}
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-muted" />
+          <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+            <Icon name="User" size={20} className="text-gray-500" />
+          </div>
         )}
       </div>
 
@@ -68,30 +70,30 @@ const LeaderboardItem = ({ friend, position, isCurrentUser = false }) => {
         <div className="flex items-center justify-between mb-1">
           <h3
             className={`font-medium truncate ${
-              isCurrentUser ? 'text-accent' : 'text-foreground'
+              isCurrentUser ? 'text-blue-700' : 'text-gray-900'
             }`}
           >
-            {friend.name || 'Unknown'}
+            {friend.name || friend.full_name || friend.email || 'Unknown User'}
             {isCurrentUser && (
-              <span className="text-xs text-muted-foreground ml-2">
+              <span className="text-xs text-gray-500 ml-2">
                 (You)
               </span>
             )}
           </h3>
-          <span className="text-sm font-semibold text-foreground">
+          <span className="text-sm font-semibold text-gray-900">
             {totalPoints.toLocaleString()}
           </span>
         </div>
 
         {/* Weekly Progress Bar */}
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+          <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
             <div
-              className="h-full bg-accent transition-all duration-300"
+              className="h-full bg-blue-500 transition-all duration-300"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
+          <span className="text-xs text-gray-500 whitespace-nowrap">
             +{weeklyProgress}
           </span>
         </div>
@@ -100,13 +102,13 @@ const LeaderboardItem = ({ friend, position, isCurrentUser = false }) => {
       {/* Trend Indicator */}
       <div className="flex items-center gap-1 flex-shrink-0">
         {friend.trend === 'up' && (
-          <Icon name="TrendingUp" size={16} className="text-success" />
+          <Icon name="TrendingUp" size={16} className="text-green-500" />
         )}
         {friend.trend === 'down' && (
-          <Icon name="TrendingDown" size={16} className="text-error" />
+          <Icon name="TrendingDown" size={16} className="text-red-500" />
         )}
         {friend.trend === 'same' && (
-          <Icon name="Minus" size={16} className="text-muted-foreground" />
+          <Icon name="Minus" size={16} className="text-gray-400" />
         )}
       </div>
     </div>
