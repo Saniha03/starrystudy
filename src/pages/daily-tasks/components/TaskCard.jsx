@@ -165,7 +165,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete }) => {
             <Icon name="Trash2" size={14} />
           </Button>
         </div>
-      </div>
+      
     </motion.div>
   );
 };
